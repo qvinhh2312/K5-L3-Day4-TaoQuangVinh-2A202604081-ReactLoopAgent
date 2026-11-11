@@ -64,6 +64,8 @@ A5 trong full after run tăng từ 15 lên 70, nhưng answer vẫn mở đầu b
 
 Regression đáng chú ý nhất là **H2: 100 → 50**. After run bỏ `get_status` dù case yêu cầu tool này, tạo mechanical violation mới. E3 giảm 15, E6 giảm 25, A6 giảm 10. Đây có thể chịu ảnh hưởng của độ ngẫu nhiên model/judge, nhưng hiện là regression quan sát được và cần kiểm tra lại bằng lượt lặp. H1 vẫn thiếu tool calls ở hai model steps; H6 vẫn thiếu giải thích và mechanical check; H7 vẫn có câu khẳng định không đủ căn cứ sau timeout.
 
+Đã chạy lặp các regression theo cùng cấu hình trên code `eval-after`: A6 **75** (so với baseline 80, giảm 5 nên không còn qua ngưỡng regression); E3 **75** (giảm 15); E6 **70** (giảm 30); H2 **50** (giảm 50, vẫn thiếu `get_status`). E3, E6 và H2 tiếp tục là regression quan sát được. Mỗi case mới chỉ có một lượt lặp.
+
 Judge dùng cùng model với agent, một lượt eval cho mỗi phiên bản không chứng minh độ ổn định. Cần đối chiếu expected và trace, không coi điểm judge là kết luận tuyệt đối.
 
 Baseline file được tạo trước khi commit/tag `eval-before`; tag được backfill sau đó từ đúng source state trước cải tiến. `eval_manifest_before.json` ghi rõ trạng thái này để không tuyên bố sai rằng baseline tree sạch tại thời điểm chạy. After eval được tạo sau commit/tag `eval-after` với cùng provider, model, judge, dataset, snapshot và giới hạn step. Hash các file đóng băng và test cũ giống nhau giữa hai tag.
