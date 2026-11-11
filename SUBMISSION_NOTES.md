@@ -76,4 +76,12 @@ Gate nguồn tầng 1 đã có trong cả hai phiên bản baseline/after. Eval 
 
 Sau khi hoàn tất các lượt eval nêu trên, system prompt được bổ sung hướng dẫn cho các lỗi lặp lại: tra cả `get_status` và `get_incident_details` khi câu hỏi yêu cầu trạng thái hiện tại cùng incident cụ thể; tách trạng thái component khỏi trạng thái vòng đời incident; giữ trạng thái là chưa xác định khi tool lỗi; retry 429 tối đa ba lần khi người dùng yêu cầu; và lấy chi tiết incident mới nhất trước khi nêu phạm vi/cập nhật. Đây là thay đổi prompt trong source hiện tại, chưa được chạy eval lại vì terminal hiện không có `OPENROUTER_API_KEY`.
 
-Vì vậy, điểm **82,50/100** và kết quả bonus **74/100 (11,1/15)** ở trên thuộc về source đã đánh giá trước bản ứng viên này, không phải điểm xác nhận cho source hiện tại. Cần chạy lại đủ 22 case core và 10 case bonus với cùng cấu hình trước khi ghi nhận điểm mới.
+Vì vậy, điểm **82,50/100** và kết quả bonus **74/100 (11,1/15)** ở trên thuộc về source đã đánh giá trước bản ứng viên này. Các lượt chạy xác nhận trên source mới được ghi ở mục tiếp theo.
+
+## Đánh giá bản ứng viên
+
+Đã chạy lại đủ core và bonus trên source commit `866e127b5eb00a853de6ae2f2a04d0704747e8bf`, với cùng OpenRouter `openai/gpt-4o-mini`, judge model và `max_steps` như các lượt trước. Core được chấm 22/22, đạt **79,55/100**; bonus 10/10, đạt **73,7/100 (11,05/15)**.
+
+Core candidate giảm 2,95 điểm so với `eval_after.json` (82,50), nhưng vẫn cao hơn baseline 77,27. H2 tăng từ 50 lên 100 và không còn thiếu `get_status`; A5 tăng 5, A6 tăng 5. E3 và E6 giữ nguyên lần lượt 75. Một số case giảm đáng kể: E1 75→60, E2 100→75, A7 100→70, A8 100→75, H4 100→80. H1 và H6 vẫn vi phạm yêu cầu gọi tool ở nhiều model step.
+
+Kết quả cho thấy thêm chỉ dẫn giải quyết được lỗi chọn tool của H2 nhưng làm điểm tổng thấp hơn do chất lượng dao động ở nhiều case; đây chưa phải một cải thiện tổng thể. Chi tiết theo case nằm trong `eval_candidate.json`.

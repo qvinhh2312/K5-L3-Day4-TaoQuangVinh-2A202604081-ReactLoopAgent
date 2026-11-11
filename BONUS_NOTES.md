@@ -24,7 +24,22 @@ The full bonus evaluation is now complete: **10/10 scored, 74/100, or 11.1/15 bo
 
 The retry cap is verified offline (three executions, then a `tool_blocked` observation), but the bonus eval shows the model does not always choose to retry. B6 also shows a model/tool-selection gap. The retry code remains model-directed; no hidden retry was added.
 
-After this run, the system prompt was extended to tell the model to retry on an explicit request, disclose an earlier 429 even after recovery, and inspect details for the newest relevant incident. The **74/100** result predates this prompt update and does not evaluate it. Re-run the full bonus set before treating the score as representative of the current source.
+After this run, the system prompt was extended to tell the model to retry on an explicit request, disclose an earlier 429 even after recovery, and inspect details for the newest relevant incident. A full candidate run then scored **73.7/100 (11.05/15), 10/10 cases**, using the same provider/model/judge and 16-step limit.
+
+| Case | Previous | Candidate | Change | Observation |
+|---|---:|---:|---:|---|
+| B1 | 100 | 75 | -25 | Lower judge score despite all five status tools being called. |
+| B2 | 100 | 80 | -20 | Pagination calls completed; judge score fell. |
+| B3 | 60 | 67 | +7 | Still omitted the first 429 and retry from the final answer. |
+| B4 | 65 | 80 | +15 | Answer correctly said Vercel status was unknown after 429; no second Vercel call. |
+| B5 | 85 | 80 | -5 | Recovered from invalid arguments, but score fell slightly. |
+| B6 | 50 | 50 | 0 | Still omitted required `get_incident_details`; mechanical cap remains. |
+| B7 | 75 | 100 | +25 | Full score. |
+| B8 | 75 | 80 | +5 | Slight improvement. |
+| B9 | 80 | 75 | -5 | Slight regression. |
+| B10 | 50 | 50 | 0 | Still made only one Vercel call after 429; mechanical cap remains. |
+
+Overall bonus moved from **74.0 to 73.7** (11.10 to 11.05 points). The prompt improved B3/B4/B7/B8, but did not make the model follow the required detail lookup in B6 or second Vercel call in B10; it also reduced B1/B2. The candidate evaluation is saved as `eval_bonus_candidate.json`. Do not replace the previous bonus report or its manifest: they document a different source commit.
 
 `run_remaining_evals.ps1` is retained for future re-runs of A6/E3/E6/H2 and bonus. It writes `eval_manifest_bonus.json` after a fully scored bonus run using `write_eval_manifest.py`.
 

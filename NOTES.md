@@ -43,4 +43,18 @@ Baseline answer: “Không có sự cố GitHub Actions nào được ghi nhận
 
 Điểm judge là ước lượng từ model, không phải xác nhận tuyệt đối về chất lượng. Snapshot dữ liệu được tạo ngày 2026-11-09 và chỉ gồm tối đa 50 incident gần nhất, nên không thể dùng để khẳng định danh sách lịch sử đầy đủ cho năm 2025. Mỗi phiên bản core có một full run; các lần chạy lặp chỉ tập trung vào A6/E3/E6/H2 và mỗi case có một lần lặp, nên kết quả cho thấy dấu hiệu dao động nhưng chưa đủ để ước lượng ổn định dài hạn. Baseline tag được backfill từ đúng source state sau khi eval baseline chạy; manifest ghi rõ điều này.
 
-Sau các lượt eval đã ghi ở trên, system prompt được bổ sung thêm hướng dẫn về đối chiếu status với incident cụ thể, phân biệt trạng thái component với incident, xử lý timeout/429 và tra chi tiết incident mới nhất. Thay đổi bổ sung này chưa được chấm lại. Vì vậy, các điểm before/after trong bảng phản ánh phiên bản đã chạy eval, không phải xác nhận điểm cho source mới nhất.
+Sau các lượt eval đã ghi ở trên, system prompt được bổ sung thêm hướng dẫn về đối chiếu status với incident cụ thể, phân biệt trạng thái component với incident, xử lý timeout/429 và tra chi tiết incident mới nhất. Bảng before/after ở trên vẫn giữ nguyên kết quả lịch sử của hai phiên bản đó; kết quả chấm source ứng viên mới được ghi bên dưới.
+
+### Lượt đánh giá bản ứng viên
+
+Sau đó, đã chạy đủ 22 case core và 10 case bonus trên commit `866e127b5eb00a853de6ae2f2a04d0704747e8bf`, cùng cấu hình model/judge và giới hạn bước như trước:
+
+| Chỉ số | `eval_after.json` | Bản ứng viên |
+|---|---:|---:|
+| Core | 82.50/100 (22/22) | 79.55/100 (22/22) |
+| Bonus | 74.0/100 (11.10/15) | 73.7/100 (11.05/15) |
+| H2 | 50 | 100 |
+| E3 / E6 | 75 / 75 | 75 / 75 |
+| B6 / B10 | 50 / 50 | 50 / 50 |
+
+Prompt mới sửa được lỗi thiếu `get_status` ở H2, nhưng điểm core tổng giảm 2.95; bonus giảm 0.3. B6 vẫn không gọi `get_incident_details`, B10 vẫn chỉ gọi Vercel một lần sau 429, còn B3 vẫn không nói rõ lần gọi đầu bị rate limit. Bản ứng viên chưa phải cải thiện tổng thể. Kết quả chi tiết nằm trong `eval_candidate.json` và `eval_bonus_candidate.json`.
