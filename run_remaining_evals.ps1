@@ -49,6 +49,10 @@ $bonusOutput = Join-Path $root 'eval_bonus.json'
     --judge-provider openrouter --judge-model openai/gpt-4o-mini `
     --max-steps 16 --workers 1 --output $bonusOutput
 $bonusExit = $LASTEXITCODE
+if ($bonusExit -eq 0) {
+    & $python write_eval_manifest.py --eval-file eval_bonus.json --output eval_manifest_bonus.json
+    if ($LASTEXITCODE -ne 0) { $bonusExit = $LASTEXITCODE }
+}
 
 if ($caseFailures.Count -gt 0) {
     Write-Error "These repeat evaluations did not complete with a score: $($caseFailures -join ', ')"

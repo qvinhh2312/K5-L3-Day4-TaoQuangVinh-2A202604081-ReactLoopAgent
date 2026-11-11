@@ -7,7 +7,7 @@ The optional bonus is implemented in a commit after the immutable core tag. `cor
 - Pagination remains model-directed. Each page result returns to the model, which chooses whether to request the next offset.
 - Core tests pass 46/46; bonus offline tests pass 7/7.
 
-The 10-case LLM bonus evaluation and four core regression repeats are pending because the current agent process has no provider credentials. No `eval_bonus.json` or bonus manifest is claimed. `run_remaining_evals.ps1` runs A6/E3/E6/H2 against the `eval-after` worktree and then the 10-case bonus eval once `OPENROUTER_API_KEY` is present in the same PowerShell process.
+The 10-case LLM bonus evaluation and four core regression repeats are pending because the current agent process has no provider credentials. No `eval_bonus.json` or bonus manifest is claimed. `run_remaining_evals.ps1` runs A6/E3/E6/H2 against the `eval-after` worktree and then the 10-case bonus eval once `OPENROUTER_API_KEY` is present in the same PowerShell process. A fully scored bonus run automatically gets `eval_manifest_bonus.json` from `write_eval_manifest.py`.
 
 After setting `PROVIDER`, `MODEL`, `JUDGE_PROVIDER`, `JUDGE_MODEL`, and the matching API key in PowerShell, run:
 
