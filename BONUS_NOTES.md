@@ -24,6 +24,8 @@ The full bonus evaluation is now complete: **10/10 scored, 74/100, or 11.1/15 bo
 
 The retry cap is verified offline (three executions, then a `tool_blocked` observation), but the bonus eval shows the model does not always choose to retry. B6 also shows a model/tool-selection gap. The retry code remains model-directed; no hidden retry was added.
 
+After this run, the system prompt was extended to tell the model to retry on an explicit request, disclose an earlier 429 even after recovery, and inspect details for the newest relevant incident. The **74/100** result predates this prompt update and does not evaluate it. Re-run the full bonus set before treating the score as representative of the current source.
+
 `run_remaining_evals.ps1` is retained for future re-runs of A6/E3/E6/H2 and bonus. It writes `eval_manifest_bonus.json` after a fully scored bonus run using `write_eval_manifest.py`.
 
 To repeat the runs, set the OpenRouter key in the current terminal without sharing it, then run the helper. It executes the four regression repeats against `eval-after`, the full bonus eval, and writes the bonus manifest if all cases score:

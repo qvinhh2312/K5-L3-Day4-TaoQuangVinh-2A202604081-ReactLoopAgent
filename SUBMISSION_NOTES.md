@@ -71,3 +71,9 @@ Judge dùng cùng model với agent, một lượt eval cho mỗi phiên bản k
 Baseline file được tạo trước khi commit/tag `eval-before`; tag được backfill sau đó từ đúng source state trước cải tiến. `eval_manifest_before.json` ghi rõ trạng thái này để không tuyên bố sai rằng baseline tree sạch tại thời điểm chạy. After eval được tạo sau commit/tag `eval-after` với cùng provider, model, judge, dataset, snapshot và giới hạn step. Hash các file đóng băng và test cũ giống nhau giữa hai tag.
 
 Gate nguồn tầng 1 đã có trong cả hai phiên bản baseline/after. Eval snapshots được ghi ngày 2026-11-09; chúng không đại diện trạng thái live hiện tại.
+
+## Bản ứng viên sau eval
+
+Sau khi hoàn tất các lượt eval nêu trên, system prompt được bổ sung hướng dẫn cho các lỗi lặp lại: tra cả `get_status` và `get_incident_details` khi câu hỏi yêu cầu trạng thái hiện tại cùng incident cụ thể; tách trạng thái component khỏi trạng thái vòng đời incident; giữ trạng thái là chưa xác định khi tool lỗi; retry 429 tối đa ba lần khi người dùng yêu cầu; và lấy chi tiết incident mới nhất trước khi nêu phạm vi/cập nhật. Đây là thay đổi prompt trong source hiện tại, chưa được chạy eval lại vì terminal hiện không có `OPENROUTER_API_KEY`.
+
+Vì vậy, điểm **82,50/100** và kết quả bonus **74/100 (11,1/15)** ở trên thuộc về source đã đánh giá trước bản ứng viên này, không phải điểm xác nhận cho source hiện tại. Cần chạy lại đủ 22 case core và 10 case bonus với cùng cấu hình trước khi ghi nhận điểm mới.

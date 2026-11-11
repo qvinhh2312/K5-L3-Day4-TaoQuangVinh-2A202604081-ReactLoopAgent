@@ -42,3 +42,5 @@ Baseline answer: “Không có sự cố GitHub Actions nào được ghi nhận
 ## 5. Giới hạn
 
 Điểm judge là ước lượng từ model, không phải xác nhận tuyệt đối về chất lượng. Snapshot dữ liệu được tạo ngày 2026-11-09 và chỉ gồm tối đa 50 incident gần nhất, nên không thể dùng để khẳng định danh sách lịch sử đầy đủ cho năm 2025. Mỗi phiên bản core có một full run; các lần chạy lặp chỉ tập trung vào A6/E3/E6/H2 và mỗi case có một lần lặp, nên kết quả cho thấy dấu hiệu dao động nhưng chưa đủ để ước lượng ổn định dài hạn. Baseline tag được backfill từ đúng source state sau khi eval baseline chạy; manifest ghi rõ điều này.
+
+Sau các lượt eval đã ghi ở trên, system prompt được bổ sung thêm hướng dẫn về đối chiếu status với incident cụ thể, phân biệt trạng thái component với incident, xử lý timeout/429 và tra chi tiết incident mới nhất. Thay đổi bổ sung này chưa được chấm lại. Vì vậy, các điểm before/after trong bảng phản ánh phiên bản đã chạy eval, không phải xác nhận điểm cho source mới nhất.
