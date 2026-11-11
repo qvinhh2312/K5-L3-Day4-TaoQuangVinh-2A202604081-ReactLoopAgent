@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "evaluation": "before",
+  "eval_file": "eval_before.json",
+  "eval_file_sha256": "7115c7fffca47103db41d5206b850c4ab98220639206648dafbbcd5db31def31",
+  "run_timestamp_utc_from_file_mtime": "2026-11-11T10:23:58.714609+00:00",
+  "manifest_generated_at_utc": "2026-11-11T10:44:26.582987+00:00",
+  "git": {
+    "tag": "eval-before",
+    "full_sha": "52822bd96cba4a80777325fde511c08ae9ca4646",
+    "tree_dirty_at_run": true,
+    "tracked_tree_clean_at_run": false,
+    "state_note": "Baseline evaluation predates the backfilled eval-before commit/tag; source tree was uncommitted then, and the baseline tag records the exact pre-improvement implementation now recovered from the workspace."
+  },
+  "python_version": "Python 3.14.7",
+  "config": {
+    "provider": "openrouter",
+    "model": "openai/gpt-4o-mini",
+    "judge_provider": "openrouter",
+    "judge_model": "openai/gpt-4o-mini",
+    "max_steps": 8,
+    "workers": 1,
+    "mode": "snapshot",
+    "dataset": "core"
+  },
+  "checksums": {
+    "normalization": "CRLF and CR normalized to LF before SHA-256",
+    "agent_py_sha256": "501d0cd2f319cfe69cad4b7fc5dd8d4d4c5925460112d7a8fa0f6f1df1ae5b5c",
+    "frozen_files_sha256_normalized_lf": {
+      "providers.py": "5df33c96055c96a6838944223e7d3747da91c94769ffd4f8a1f94d7b13ea719d",
+      "run.py": "0df79e45562f31bb3a04c9a3ca0f20c340581b63d5f02ae386b922351557388b",
+      "status_tools.py": "8aaf3ea4ff938a251ccabfbfecafb8fcd3df86c580e881c2aec784baa06adef0",
+      "evals/run_evals.py": "d41da3afdd3a49d183c7dccc57e86c9638822cd27ccec133fae26a385855deed",
+      "evals/cases.json": "3070f2dff24d9518b690213c280a318ff880931ef042603d7371f4280b930e34",
+      "evals/scenarios.py": "019de84221bc343299acf596cfddc033bd24fa064df0c30c03f36e75fe1c1ef2",
+      "evals/grading.py": "290d342cf40c49926bd635a8046ffb6106321821e3d68ce4286b08878f3c26bf",
+      "RUBRIC.md": "e59bf7e89c69f9d580030a2ec5cf878ded8de88fb50be923ab9adde9d9e204d7",
+      "bonus/tools.py": "7b9e56dad3079536e5eb0d3205528277a588214efa072b77a582b9ebfdf914f3",
+      "fixtures/cloudflare.json": "896e753ad1ff6d67d5817781a487be597335dc5c124bbf0328098738bb202ab4",
+      "fixtures/github.json": "c4b72f0ab397fa72702908dc1d73aa893af66fff158b3b1bcabf223afb792ad7"
+    },
+    "tests_sha256_normalized_lf": {
+      "tests/test_bonus.py": "8a9258c2c952712c6d8eb3528829c7523017d757ca66b483dc850b54eb45b6ed",
+      "tests/test_grading.py": "8e88124543ee4c259bbdba075e2a7c59367e3787859c5b8a56462a09527d8c2a",
+      "tests/test_lab.py": "2898cbdea1aeb6c72a2b5c51741b60be280b7f9dbc7641322065f421265cfa7e",
+      "tests/test_robustness.py": "b661bb7843164830576ce55df5e49a41b60f468dfde017021eadad0f6b817a32",
+      "tests/test_validation.py": "e5ed5c212b4f63790d529496be85ccebfdff6fc1b99b99b79b0767eb5ce87a76"
+    },
+    "preexisting_tests_sha256_normalized_lf": {
+      "tests/test_lab.py": "2898cbdea1aeb6c72a2b5c51741b60be280b7f9dbc7641322065f421265cfa7e",
+      "tests/test_validation.py": "e5ed5c212b4f63790d529496be85ccebfdff6fc1b99b99b79b0767eb5ce87a76",
+      "tests/test_grading.py": "8e88124543ee4c259bbdba075e2a7c59367e3787859c5b8a56462a09527d8c2a",
+      "tests/test_bonus.py": "8a9258c2c952712c6d8eb3528829c7523017d757ca66b483dc850b54eb45b6ed"
+    }
+  },
+  "summary": {
+    "total_cases": 22,
+    "scored_cases": 22,
+    "unscored_cases": 0,
+    "score_0_100": 77.27,
+    "partial_mean_0_100": null
+  }
+}
