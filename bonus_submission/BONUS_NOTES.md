@@ -9,10 +9,10 @@ The optional bonus is implemented in a commit after the immutable core tag. `cor
 
 The 10-case LLM bonus evaluation and four core regression repeats are pending because the current agent process has no provider credentials. No `eval_bonus.json` or bonus manifest is claimed. `run_remaining_evals.ps1` runs A6/E3/E6/H2 against the `eval-after` worktree and then the 10-case bonus eval once `OPENROUTER_API_KEY` is present in the same PowerShell process. A fully scored bonus run automatically gets `eval_manifest_bonus.json` from `write_eval_manifest.py`.
 
-After setting `PROVIDER`, `MODEL`, `JUDGE_PROVIDER`, `JUDGE_MODEL`, and the matching API key in PowerShell, run:
+Set the OpenRouter key in the current terminal without sharing it, then run the helper. It executes the four regression repeats against `eval-after`, the full bonus eval against the bonus commit, and writes the bonus manifest if all cases score:
 
 ```powershell
 $env:PYTHONUTF8 = "1"
-$py = "C:\Users\qvinh\AppData\Local\Python\bin\python.exe"
-& $py evals/run_evals.py --bonus --provider openrouter --model openai/gpt-4o-mini --judge-provider openrouter --judge-model openai/gpt-4o-mini --max-steps 16 --workers 1 --output eval_bonus.json
+$env:OPENROUTER_API_KEY = "<your key>"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run_remaining_evals.ps1
 ```
