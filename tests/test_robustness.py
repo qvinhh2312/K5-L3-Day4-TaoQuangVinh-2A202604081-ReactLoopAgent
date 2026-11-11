@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from agent import run_agent
+from agent import SYSTEM_PROMPT, run_agent
 
 
 class Provider:
@@ -52,6 +52,10 @@ def call(arguments, name='known', call_id='call-id'):
 
 
 class RobustnessTests(unittest.TestCase):
+    def test_system_prompt_states_status_search_completeness_limit(self):
+        self.assertIn('50 incident gần nhất', SYSTEM_PROMPT)
+        self.assertIn('không đủ để xác minh tính đầy đủ', SYSTEM_PROMPT)
+
     def test_empty_and_non_object_arguments(self):
         for raw, expected_error in [('', None), (None, None), ('null', 'INVALID_ARGUMENTS'),
                                     ('[]', 'INVALID_ARGUMENTS'), ('"x"', 'INVALID_ARGUMENTS')]:
