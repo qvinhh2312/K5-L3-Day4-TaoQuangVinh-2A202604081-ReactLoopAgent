@@ -121,6 +121,8 @@ def _provider_for(entry):
     if isinstance(args, dict) and args.get('provider'):
         return str(args['provider']).casefold()
     name = entry.get('name', '')
+    if not isinstance(name, str):
+        return ''
     if name.startswith('get_') and name.endswith('_status'):
         return name[4:-7].casefold()
     return ''
@@ -197,7 +199,8 @@ def _required_followups(question, trace, answer=None, disclosure_prompted=None):
 
     if asks_latest:
         for entry in tools:
-            if not entry.get('name', '').startswith('get_') or not entry.get('name', '').endswith('_status'):
+            name = entry.get('name')
+            if not isinstance(name, str) or not name.startswith('get_') or not name.endswith('_status'):
                 continue
             result = _tool_result(entry)
             if result.get('error') or not isinstance(result.get('incidents'), list):

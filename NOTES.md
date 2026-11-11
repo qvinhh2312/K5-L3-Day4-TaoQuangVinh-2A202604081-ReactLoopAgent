@@ -1,7 +1,7 @@
 ﻿# Ghi chú phân tích · Day 04
 
-Họ và tên: [điền họ tên]
-MSSV: [điền MSSV]
+Họ và tên: Chưa được cung cấp
+MSSV: Chưa được cung cấp
 
 ## 1. Case được chọn
 
@@ -59,4 +59,23 @@ Sau đó, đã chạy đủ 22 case core và 10 case bonus trên commit `866e127
 
 Prompt mới sửa được lỗi thiếu `get_status` ở H2, nhưng điểm core tổng giảm 2.95; bonus giảm 0.3. B6 vẫn không gọi `get_incident_details`, B10 vẫn chỉ gọi Vercel một lần sau 429, còn B3 vẫn không nói rõ lần gọi đầu bị rate limit. Bản ứng viên chưa phải cải thiện tổng thể. Kết quả chi tiết nằm trong `eval_candidate.json` và `eval_bonus_candidate.json`.
 
-Sau lượt đó, `agent.py` được cập nhật thêm cơ chế nhắc model dựa trên trace để hoàn tất retry được yêu cầu và tra incident mới nhất/liên kết trước khi trả lời. Đây là bản mới hơn, chưa được chấm. Điểm candidate trong bảng không áp dụng cho thay đổi này; cần chạy lại eval bằng key của bạn. Lượt eval chưa thể chạy trong process hiện tại vì thiếu `OPENROUTER_API_KEY`.
+Sau lượt đó, `agent.py` được cập nhật thêm cơ chế nhắc model dựa trên trace để hoàn tất retry được yêu cầu và tra incident mới nhất/liên kết trước khi trả lời. Tại thời điểm đó bản mới chưa được chấm; lượt eval chạy sau trên commit `ca987f0` được ghi bên dưới. Điểm candidate trong bảng không áp dụng cho code sau này.
+
+### Eval bản loop-followup
+
+Sau đó đã xuất hiện `eval_next_candidate.json` và `eval_bonus_next_candidate.json`, được chạy trên source commit `ca987f0c7a96b5fc91ce2cb2c4c8ff50960c6147` với cùng OpenRouter model/judge, core `max_steps=8`, bonus `max_steps=16`, `workers=1`.
+
+| Tập | Kết quả | Trạng thái |
+|---|---:|---|
+| Core | 80.23/100 (22/22) | Đã chấm đủ |
+| Bonus | 9 case đã chấm, 1 chưa chấm; partial mean 78.33 | Điểm tổng và bonus points là `null` |
+
+Follow-up đã giúp H1/H6 đủ hai model step (đều 80 điểm, không còn mechanical violation), B3 nêu được lần đầu bị 429 rồi retry thành công (75), B4 dừng sau ba lần Vercel bị giới hạn (85). B6 bị `WinError 10054` khi model gọi tiếp sau các nhắc việc; case chưa được chấm, không được tính như điểm 0. B10 có bốn tool calls Vercel vì loop reset bộ đếm sau khi một retry thành công; mechanical check giới hạn tối đa ba lần nên case bị cap 50.
+
+Sau lượt này, loop được sửa để giới hạn tổng số lần gọi là ba khi user yêu cầu retry và nhắc model dừng sau khi retry thành công. Bản sửa mới này **chưa được eval**. Họ tên/MSSV và trạng thái nộp LMS vẫn chưa có trong workspace; cần chủ repo tự điền trước khi nộp.
+
+### Kết quả cho commit `ca987f0`
+
+Core được chấm đủ 22/22, đạt **80.23/100**. H1/H6 đạt yêu cầu hai model step, mỗi case 80 điểm; H2 đạt 90. Bonus chỉ chấm đủ 9/10, partial mean 78.33, không có điểm tổng hoặc điểm bonus hợp lệ vì B6 gặp lỗi kết nối `[WinError 10054]`. B10 bị cap 50 do bốn lần gọi Vercel. Những kết quả này áp dụng cho commit `ca987f0`, trước sửa giới hạn tổng lần gọi.
+
+Code sau sửa được lưu tại `submission/final_candidate/`; chưa có kết quả eval của bản đó. Họ tên, MSSV, lớp và link nộp chưa được cung cấp, nên thông tin cá nhân trong bản nộp cần chủ repo tự hoàn thiện.

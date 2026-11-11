@@ -90,4 +90,23 @@ Kết quả cho thấy thêm chỉ dẫn giải quyết được lỗi chọn to
 
 Sau lượt candidate, `agent.py` được cập nhật để khi câu hỏi yêu cầu rõ ràng, loop sẽ gửi model một nhắc việc có căn cứ từ trace: gọi lại tool sau HTTP 429 theo giới hạn, nêu lần rate limit nếu retry thành công, tra `get_incident_details` cho incident mới nhất tìm được qua status, và theo URL incident liên quan trước khi trả lời. Loop không tự gọi tool thay model. Bản này chưa được eval; các điểm candidate ở mục trên không áp dụng cho thay đổi mới nhất.
 
-Lượt eval chưa chạy được trong môi trường này vì biến `OPENROUTER_API_KEY` không có trong process. Cần chạy đủ core và bonus sau khi cấp key để quyết định có giữ thay đổi này.
+Tại thời điểm ghi mục này, lượt eval chưa chạy được trong process làm việc vì thiếu `OPENROUTER_API_KEY`. Kết quả do người dùng chạy sau đó được ghi ở mục dưới.
+
+## Eval loop-followup và giới hạn retry
+
+Kết quả trên commit `ca987f0c7a96b5fc91ce2cb2c4c8ff50960c6147`:
+
+- Core: **80.23/100, 22/22**, cùng cấu hình OpenRouter `openai/gpt-4o-mini`, judge cùng model, `max_steps=8`.
+- Bonus: **9/10 scored, 1 unscored**, partial mean **78.33**. Vì B6 gặp lỗi kết nối `[WinError 10054]`, `score_0_100` và `bonus_points_0_15` là `null`; không thể báo điểm bonus hoàn chỉnh.
+- H1/H6 đều đạt hai model steps, không còn mechanical violation. B3 nêu rõ 429 rồi retry thành công. B4 gọi Vercel ba lần rồi bị chặn lần gọi kế tiếp.
+- B10 vượt giới hạn ba lần gọi Vercel: lần gọi thành công reset bộ đếm liên tiếp, khiến model tiếp tục gọi. Đây là lỗi giới hạn ở retry state.
+
+Sau eval này, `agent.py` được sửa để đếm tối đa ba lần gọi tổng cộng cho câu hỏi yêu cầu retry rõ ràng và yêu cầu dừng sau lần retry thành công. Thay đổi mới chưa được đánh giá. Kết quả `eval_next_candidate.json`/`eval_bonus_next_candidate.json` chỉ áp dụng cho commit `ca987f0` trước sửa đổi cuối.
+
+## Hạng mục còn mở sau lượt đó
+
+- `eval_next_candidate.json`: core 22/22, **80.23/100**. H1 và H6 đều đạt 80 và không còn mechanical violation; H2 đạt 90. E3/E6 vẫn 75/75.
+- `eval_bonus_next_candidate.json`: **9/10 scored**, partial mean 78.33; điểm tổng và bonus là `null`. B6 không có kết quả chấm do kết nối model bị reset (`WinError 10054`), nên cần chạy lại full bonus.
+- B10 bị cap 50 vì bốn lần gọi Vercel; đây là lý do thêm giới hạn tổng lần thử. Bản sửa sau commit `ca987f0` hiện trong `submission/final_candidate/` và chưa được eval.
+
+Họ tên, MSSV, lớp và link LMS chưa được cung cấp trong workspace. Chúng cần được điền bởi chủ repo trước khi nộp. Các output đã có được giữ nguyên; không ghép tay hoặc sửa kết quả chấm.

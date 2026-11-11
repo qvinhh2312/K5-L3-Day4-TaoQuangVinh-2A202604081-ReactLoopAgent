@@ -41,7 +41,26 @@ After this run, the system prompt was extended to tell the model to retry on an 
 
 Overall bonus moved from **74.0 to 73.7** (11.10 to 11.05 points). The prompt improved B3/B4/B7/B8, but did not make the model follow the required detail lookup in B6 or second Vercel call in B10; it also reduced B1/B2. The candidate evaluation is saved as `eval_bonus_candidate.json`. Do not replace the previous bonus report or its manifest: they document a different source commit.
 
-The current working agent loop now sends the model a trace-based follow-up when an explicit retry request is still pending or when the requested latest/linked incident has not yet been inspected. This is a new, unevaluated change intended to address B3/B4/B6/B10. The 73.7 result above predates it. A fresh full bonus run is still required.
+After the 73.7 candidate run, the loop added trace-based follow-ups when an explicit retry request was still pending or a requested latest/linked incident had not been inspected. That version was later evaluated on commit `ca987f0` (results below). The current total-attempt cap was added after that run and remains unevaluated.
+
+## Loop-followup evaluation
+
+The full bonus command was run on source commit `ca987f0c7a96b5fc91ce2cb2c4c8ff50960c6147`. The report contains **9 scored cases and 1 unscored case**, so its overall score and bonus points are `null` (partial mean 78.33). B6's follow-up model request failed with `[WinError 10054] An existing connection was forcibly closed by the remote host`; this is an infrastructure interruption, not a scored agent result. Re-run all ten cases to obtain a valid bonus score.
+
+| Case | Score/status | Result |
+|---|---:|---|
+| B1 | 80 | All five status tools called. |
+| B2 | 100 | Timeline pagination across three model steps. |
+| B3 | 75 | Called twice; answer disclosed initial 429 and successful retry. |
+| B4 | 85 | Three actual Vercel calls; the fourth was blocked. |
+| B5 | 100 | Corrected invalid arguments and cited source. |
+| B6 | Unscored | Required detail lookups were prompted; provider connection reset before next model reply. |
+| B7 | 80 | Correct npm status, but judge noted unnecessary historical details. |
+| B8 | 100 | Compared both incidents with evidence. |
+| B9 | 35 | Did not directly resolve the unsupported Linear/Slack outage premise. |
+| B10 | 50 | Four Vercel calls exceeded the three-call mechanical limit. |
+
+The B10 trace exposed a code issue: a successful response reset the consecutive-429 counter, so the model could call the tool again and exceed the requested total bound. The current source now tracks total attempts (maximum three) for explicit retry requests and prompts the model to stop after a successful retry. That fix postdates the `ca987f0` evaluation and has not yet been scored. `eval_bonus_next_candidate.json` is retained as a partial run only; it does not earn the 11.05 points shown by the prior complete run.
 
 `run_remaining_evals.ps1` is retained for future re-runs of A6/E3/E6/H2 and bonus. It writes `eval_manifest_bonus.json` after a fully scored bonus run using `write_eval_manifest.py`.
 

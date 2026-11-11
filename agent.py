@@ -181,6 +181,10 @@ def _required_followups(question, trace, answer=None, disclosure_prompted=None):
                     followups.append((key,
                         f'Nêu rõ trong câu trả lời cuối rằng lần gọi đầu của {provider} bị HTTP 429 '
                         'và lần gọi sau đã thành công; giữ nguyên kết quả tool và nguồn.'))
+            elif later_success:
+                followups.append((f'stop:{provider}',
+                    f'Đã có lần gọi lại {name} thành công sau HTTP 429. Dừng retry {provider}; '
+                    'dùng kết quả thành công này và hoàn tất câu trả lời, có nhắc lần 429 ban đầu.'))
 
     normalized = question.casefold()
     asks_latest = 'incident' in normalized and any(term in normalized for term in (
@@ -283,7 +287,9 @@ def _fit_trace(trace):
 
 
 def _run_one_tool(tools, call, step, trace, urls, retry_state=None):
-    retry_state = retry_state if retry_state is not None else {'counts': {}, 'deadlines': {}}
+    retry_state = retry_state if retry_state is not None else {
+        'counts': {}, 'deadlines': {}, 'attempts': {}, 'max_attempts': None,
+    }
     if not isinstance(call, dict):
         call = {}
     name = call.get('name', '')
@@ -298,9 +304,12 @@ def _run_one_tool(tools, call, step, trace, urls, retry_state=None):
         except (TypeError, ValueError):
             args = None
     retry_key = _retry_key(name, args)
-    if retry_state['counts'].get(retry_key, 0) >= 3:
+    attempts = retry_state.setdefault('attempts', {}).get(retry_key, 0)
+    max_attempts = retry_state.get('max_attempts')
+    attempt_limit_reached = isinstance(max_attempts, int) and attempts >= max_attempts
+    if attempt_limit_reached or retry_state['counts'].get(retry_key, 0) >= 3:
         blocked = {'ok': False, 'error': 'RATE_LIMITED',
-                   'message': 'Tool blocked after three consecutive rate limits; service status is unknown.'}
+                   'message': 'Tool blocked after the retry limit; service status is unknown.'}
         blocked_entry = {'event': 'tool_blocked', 'step': step, 'tool_call_id': call.get('id'),
                          'name': name, 'arguments': _json_safe(args if isinstance(args, dict) else raw),
                          'result': json.dumps(blocked, ensure_ascii=False)}
@@ -316,6 +325,7 @@ def _run_one_tool(tools, call, step, trace, urls, retry_state=None):
         remaining = max(0.0, min(deadline - time.monotonic(), 10.0))
         if remaining:
             time.sleep(remaining)
+    retry_state['attempts'][retry_key] = attempts + 1
     if not isinstance(args, dict):
         result = {'ok': False, 'error': 'INVALID_ARGUMENTS',
                   'message': 'Tool arguments must be a JSON object.'}
@@ -363,7 +373,8 @@ def run_agent(question, provider, tools, max_steps=6, strict_sources=False):
     trace, usage, urls = [], [], {}
     strict_source_prompted = False
     disclosure_prompted = set()
-    retry_state = {'counts': {}, 'deadlines': {}}
+    retry_state = {'counts': {}, 'deadlines': {}, 'attempts': {},
+                   'max_attempts': 3 if _retry_requested(question) else None}
     for step in range(1, max_steps + 1):
         try:
             reply = provider.complete(messages, schemas)

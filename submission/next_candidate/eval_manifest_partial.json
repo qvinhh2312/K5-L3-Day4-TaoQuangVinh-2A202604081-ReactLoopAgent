@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "source_commit": "ca987f0c7a96b5fc91ce2cb2c4c8ff50960c6147",
+  "source_agent_sha256_normalized_lf": "9da93092d65cedf5962d004cd74467f90cf6b66fa4771bc04a64ddfc6a93734a",
+  "source_commit_basis": "Eval output files were created after this commit; packaged agent was retrieved directly from this commit.",
+  "evaluations": {
+    "eval_next_candidate.json": {
+      "sha256": "d7e686a28ba2cd376150d8697d22a8b2ea052f6129a0b7704187856521f79f01",
+      "run_file_mtime_utc": "2026-11-11T12:45:35.227199+00:00",
+      "config": {
+        "provider": "openrouter",
+        "model": "openai/gpt-4o-mini",
+        "judge_provider": "openrouter",
+        "judge_model": "openai/gpt-4o-mini",
+        "max_steps": 8,
+        "dataset": "core"
+      },
+      "summary": {
+        "total_cases": 22,
+        "scored_cases": 22,
+        "unscored_cases": 0,
+        "score_0_100": 80.23,
+        "partial_mean_0_100": null
+      }
+    },
+    "eval_bonus_next_candidate.json": {
+      "sha256": "dac617438aaec87da09b2e039089f903a7b646638b68831ea61c60c94f28e010",
+      "run_file_mtime_utc": "2026-11-11T12:48:08.962664+00:00",
+      "config": {
+        "provider": "openrouter",
+        "model": "openai/gpt-4o-mini",
+        "judge_provider": "openrouter",
+        "judge_model": "openai/gpt-4o-mini",
+        "max_steps": 16,
+        "dataset": "bonus"
+      },
+      "summary": {
+        "total_cases": 10,
+        "scored_cases": 9,
+        "unscored_cases": 1,
+        "score_0_100": null,
+        "partial_mean_0_100": 78.33,
+        "bonus_points_0_15": null
+      }
+    }
+  },
+  "caveat": "Bonus run is partial (9/10 scored); overall score and bonus points are null. Rerun the full bonus set before reporting a bonus score."
+}
