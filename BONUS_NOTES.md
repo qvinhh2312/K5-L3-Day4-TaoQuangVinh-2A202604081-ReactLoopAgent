@@ -1,5 +1,8 @@
 # Bonus implementation status
 
+**Họ và tên:** Tao Quang Vinh · **MSSV:** 2A202604081 · **Lớp:** L3B
+**Tên repo cần dùng:** `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`
+
 The optional bonus is implemented in a commit after the immutable core tag. `core-submission` still points to the evaluated core commit.
 
 - Three consecutive 429 responses are allowed per `(tool_name, provider)` pair. The next model-requested call is blocked with a `tool_blocked` trace event and a tool observation that the provider status is unknown; the tool is not executed.

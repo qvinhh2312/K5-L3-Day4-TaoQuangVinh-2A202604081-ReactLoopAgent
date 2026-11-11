@@ -27,4 +27,4 @@ Chỉ `eval_bonus_final.json` đủ 10/10 case mới có điểm tổng và bonu
 
 ## Thông tin cá nhân còn thiếu
 
-Họ tên, MSSV, lớp và link repo cá nhân/LMS không có trong workspace. Điền chúng vào bản NOTES/repo trước khi nộp; không dùng dữ liệu giả.
+Thông tin chủ repo: **Tao Quang Vinh**, **2A202604081**, lớp **L3B**. `origin` hiện trỏ tới `https://github.com/qvinhh2312/K5-L3-Day4-ReactLoopAgent`; tên repo theo quy định là `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`, URL dự kiến `https://github.com/qvinhh2312/K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`. Chưa xác nhận đổi tên trên GitHub hoặc nộp link LMS.

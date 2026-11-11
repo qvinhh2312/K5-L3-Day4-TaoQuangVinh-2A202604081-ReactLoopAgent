@@ -1,4 +1,7 @@
-﻿# Kết quả đánh giá bản ứng viên
+# Kết quả đánh giá bản ứng viên
+
+**H?c vi?n:** Tao Quang Vinh ? **MSSV:** 2A202604081 ? **L?p:** L3B
+**T?n repo c?n d?ng:** `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`
 
 Source được đánh giá: commit `866e127b5eb00a853de6ae2f2a04d0704747e8bf`.
 

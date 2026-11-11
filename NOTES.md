@@ -1,7 +1,11 @@
 ﻿# Ghi chú phân tích · Day 04
 
-Họ và tên: Chưa được cung cấp
-MSSV: Chưa được cung cấp
+Họ và tên: Tao Quang Vinh
+MSSV: 2A202604081
+Lớp: L3B
+Tên repo cần dùng: `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`
+Remote hiện tại: `https://github.com/qvinhh2312/K5-L3-Day4-ReactLoopAgent`
+URL dự kiến sau khi đổi tên: `https://github.com/qvinhh2312/K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent` (chưa xác nhận)
 
 ## 1. Case được chọn
 
@@ -72,10 +76,10 @@ Sau đó đã xuất hiện `eval_next_candidate.json` và `eval_bonus_next_cand
 
 Follow-up đã giúp H1/H6 đủ hai model step (đều 80 điểm, không còn mechanical violation), B3 nêu được lần đầu bị 429 rồi retry thành công (75), B4 dừng sau ba lần Vercel bị giới hạn (85). B6 bị `WinError 10054` khi model gọi tiếp sau các nhắc việc; case chưa được chấm, không được tính như điểm 0. B10 có bốn tool calls Vercel vì loop reset bộ đếm sau khi một retry thành công; mechanical check giới hạn tối đa ba lần nên case bị cap 50.
 
-Sau lượt này, loop được sửa để giới hạn tổng số lần gọi là ba khi user yêu cầu retry và nhắc model dừng sau khi retry thành công. Bản sửa mới này **chưa được eval**. Họ tên/MSSV và trạng thái nộp LMS vẫn chưa có trong workspace; cần chủ repo tự điền trước khi nộp.
+Sau lượt này, loop được sửa để giới hạn tổng số lần gọi là ba khi user yêu cầu retry và nhắc model dừng sau khi retry thành công. Bản sửa mới này **chưa được eval**. Link repo GitHub đã đổi tên và trạng thái nộp LMS chưa có trong workspace.
 
 ### Kết quả cho commit `ca987f0`
 
 Core được chấm đủ 22/22, đạt **80.23/100**. H1/H6 đạt yêu cầu hai model step, mỗi case 80 điểm; H2 đạt 90. Bonus chỉ chấm đủ 9/10, partial mean 78.33, không có điểm tổng hoặc điểm bonus hợp lệ vì B6 gặp lỗi kết nối `[WinError 10054]`. B10 bị cap 50 do bốn lần gọi Vercel. Những kết quả này áp dụng cho commit `ca987f0`, trước sửa giới hạn tổng lần gọi.
 
-Code sau sửa được lưu tại `submission/final_candidate/`; chưa có kết quả eval của bản đó. Họ tên, MSSV, lớp và link nộp chưa được cung cấp, nên thông tin cá nhân trong bản nộp cần chủ repo tự hoàn thiện.
+Code sau sửa được lưu tại `submission/final_candidate/`; chưa có kết quả eval của bản đó. Thông tin cá nhân đã được điền ở đầu file. Remote `origin` vẫn trỏ tới tên repo cũ nêu trên; tên và URL đích đã ghi ở đầu file. Chưa xác nhận việc đổi tên GitHub hay nộp LMS.

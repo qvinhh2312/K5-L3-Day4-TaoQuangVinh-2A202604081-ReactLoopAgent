@@ -1,5 +1,10 @@
 # Status Investigation Agent — kết quả đánh giá
 
+**Họ và tên:** Tao Quang Vinh
+**MSSV:** 2A202604081
+**Lớp:** L3B
+**Tên repo cần dùng:** `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`
+
 ## Kiến trúc và độ bền
 
 `run_agent()` gọi model theo từng step, giữ nguyên assistant message, thực thi mọi tool call theo thứ tự và trả lại đúng `tool_call_id`. Lỗi tool trở thành observation; lỗi provider, output bị cắt và hết step có trạng thái riêng. Trace ghi model/tool events, giữ trường bằng chứng thiết yếu và thu gọn dữ liệu lớn. Gate nguồn tầng 1 chỉ yêu cầu URL HTTP(S) từ `get_incident_details` thành công. Gate tầng 2 có cờ `strict_sources`, mặc định tắt.
@@ -109,4 +114,4 @@ Sau eval này, `agent.py` được sửa để đếm tối đa ba lần gọi t
 - `eval_bonus_next_candidate.json`: **9/10 scored**, partial mean 78.33; điểm tổng và bonus là `null`. B6 không có kết quả chấm do kết nối model bị reset (`WinError 10054`), nên cần chạy lại full bonus.
 - B10 bị cap 50 vì bốn lần gọi Vercel; đây là lý do thêm giới hạn tổng lần thử. Bản sửa sau commit `ca987f0` hiện trong `submission/final_candidate/` và chưa được eval.
 
-Họ tên, MSSV, lớp và link LMS chưa được cung cấp trong workspace. Chúng cần được điền bởi chủ repo trước khi nộp. Các output đã có được giữ nguyên; không ghép tay hoặc sửa kết quả chấm.
+Họ tên, MSSV và lớp đã được điền ở đầu ghi chú. `origin` hiện là `https://github.com/qvinhh2312/K5-L3-Day4-ReactLoopAgent`; repo cần đổi thành `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`. URL dự kiến sau đổi tên là `https://github.com/qvinhh2312/K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`, chưa xác nhận. Trạng thái nộp LMS cũng chưa được ghi nhận. Các output eval đã có được giữ nguyên; không ghép tay hoặc sửa kết quả chấm.
