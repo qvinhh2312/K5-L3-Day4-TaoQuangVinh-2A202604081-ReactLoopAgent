@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "source_commit": "866e127b5eb00a853de6ae2f2a04d0704747e8bf",
+  "source_commit_basis": "Evaluation output files were created after this commit; the candidate agent.py is byte-for-byte the committed file.",
+  "agent_py_sha256": "505c58df72fbd260c1db0b605b3368d8b62b5ba6c1497d69d8d503a64d4cd352",
+  "agent_py_sha256_normalized_lf": "505c58df72fbd260c1db0b605b3368d8b62b5ba6c1497d69d8d503a64d4cd352",
+  "evaluations": {
+    "eval_candidate.json": {
+      "sha256": "21e6a62fbd1013dbc5ec2a14d467e25b1ff433530bfb88a3337b31d55e0bcac3",
+      "run_file_mtime_utc": "2026-11-11T12:21:07.346084+00:00",
+      "config": {
+        "provider": "openrouter",
+        "model": "openai/gpt-4o-mini",
+        "judge_provider": "openrouter",
+        "judge_model": "openai/gpt-4o-mini",
+        "max_steps": 8,
+        "dataset": "core"
+      },
+      "summary": {
+        "total_cases": 22,
+        "scored_cases": 22,
+        "unscored_cases": 0,
+        "score_0_100": 79.55,
+        "partial_mean_0_100": null
+      }
+    },
+    "eval_bonus_candidate.json": {
+      "sha256": "3dfe558f93bc0f245747b80d096340e669fe6b522af088bae1919f448c411744",
+      "run_file_mtime_utc": "2026-11-11T12:22:55.624756+00:00",
+      "config": {
+        "provider": "openrouter",
+        "model": "openai/gpt-4o-mini",
+        "judge_provider": "openrouter",
+        "judge_model": "openai/gpt-4o-mini",
+        "max_steps": 16,
+        "dataset": "bonus"
+      },
+      "summary": {
+        "total_cases": 10,
+        "scored_cases": 10,
+        "unscored_cases": 0,
+        "score_0_100": 73.7,
+        "partial_mean_0_100": null,
+        "bonus_points_0_15": 11.05
+      }
+    }
+  },
+  "caveat": "The eval runner output does not itself record Git metadata; source commit attribution is reconstructed from commit and file timestamps."
+}
