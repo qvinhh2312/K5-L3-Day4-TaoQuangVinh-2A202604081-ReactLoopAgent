@@ -58,3 +58,5 @@ Sau đó, đã chạy đủ 22 case core và 10 case bonus trên commit `866e127
 | B6 / B10 | 50 / 50 | 50 / 50 |
 
 Prompt mới sửa được lỗi thiếu `get_status` ở H2, nhưng điểm core tổng giảm 2.95; bonus giảm 0.3. B6 vẫn không gọi `get_incident_details`, B10 vẫn chỉ gọi Vercel một lần sau 429, còn B3 vẫn không nói rõ lần gọi đầu bị rate limit. Bản ứng viên chưa phải cải thiện tổng thể. Kết quả chi tiết nằm trong `eval_candidate.json` và `eval_bonus_candidate.json`.
+
+Sau lượt đó, `agent.py` được cập nhật thêm cơ chế nhắc model dựa trên trace để hoàn tất retry được yêu cầu và tra incident mới nhất/liên kết trước khi trả lời. Đây là bản mới hơn, chưa được chấm. Điểm candidate trong bảng không áp dụng cho thay đổi này; cần chạy lại eval bằng key của bạn. Lượt eval chưa thể chạy trong process hiện tại vì thiếu `OPENROUTER_API_KEY`.

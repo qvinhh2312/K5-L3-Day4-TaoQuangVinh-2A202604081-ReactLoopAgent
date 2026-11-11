@@ -85,3 +85,9 @@ Vì vậy, điểm **82,50/100** và kết quả bonus **74/100 (11,1/15)** ở 
 Core candidate giảm 2,95 điểm so với `eval_after.json` (82,50), nhưng vẫn cao hơn baseline 77,27. H2 tăng từ 50 lên 100 và không còn thiếu `get_status`; A5 tăng 5, A6 tăng 5. E3 và E6 giữ nguyên lần lượt 75. Một số case giảm đáng kể: E1 75→60, E2 100→75, A7 100→70, A8 100→75, H4 100→80. H1 và H6 vẫn vi phạm yêu cầu gọi tool ở nhiều model step.
 
 Kết quả cho thấy thêm chỉ dẫn giải quyết được lỗi chọn tool của H2 nhưng làm điểm tổng thấp hơn do chất lượng dao động ở nhiều case; đây chưa phải một cải thiện tổng thể. Chi tiết theo case nằm trong `eval_candidate.json`.
+
+## Bản tiếp theo đang chờ eval
+
+Sau lượt candidate, `agent.py` được cập nhật để khi câu hỏi yêu cầu rõ ràng, loop sẽ gửi model một nhắc việc có căn cứ từ trace: gọi lại tool sau HTTP 429 theo giới hạn, nêu lần rate limit nếu retry thành công, tra `get_incident_details` cho incident mới nhất tìm được qua status, và theo URL incident liên quan trước khi trả lời. Loop không tự gọi tool thay model. Bản này chưa được eval; các điểm candidate ở mục trên không áp dụng cho thay đổi mới nhất.
+
+Lượt eval chưa chạy được trong môi trường này vì biến `OPENROUTER_API_KEY` không có trong process. Cần chạy đủ core và bonus sau khi cấp key để quyết định có giữ thay đổi này.

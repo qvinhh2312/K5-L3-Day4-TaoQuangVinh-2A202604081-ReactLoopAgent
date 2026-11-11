@@ -41,6 +41,8 @@ After this run, the system prompt was extended to tell the model to retry on an 
 
 Overall bonus moved from **74.0 to 73.7** (11.10 to 11.05 points). The prompt improved B3/B4/B7/B8, but did not make the model follow the required detail lookup in B6 or second Vercel call in B10; it also reduced B1/B2. The candidate evaluation is saved as `eval_bonus_candidate.json`. Do not replace the previous bonus report or its manifest: they document a different source commit.
 
+The current working agent loop now sends the model a trace-based follow-up when an explicit retry request is still pending or when the requested latest/linked incident has not yet been inspected. This is a new, unevaluated change intended to address B3/B4/B6/B10. The 73.7 result above predates it. A fresh full bonus run is still required.
+
 `run_remaining_evals.ps1` is retained for future re-runs of A6/E3/E6/H2 and bonus. It writes `eval_manifest_bonus.json` after a fully scored bonus run using `write_eval_manifest.py`.
 
 To repeat the runs, set the OpenRouter key in the current terminal without sharing it, then run the helper. It executes the four regression repeats against `eval-after`, the full bonus eval, and writes the bonus manifest if all cases score:

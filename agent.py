@@ -1,6 +1,7 @@
 """Tool-using status agent loop."""
 import json
 import math
+import re
 import time
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -105,6 +106,139 @@ def _retry_delay(result):
                 continue
         return max(0.0, min(seconds, 10.0))
     return 0.0
+
+
+def _tool_result(entry):
+    try:
+        value = json.loads(entry.get('result', ''))
+        return value if isinstance(value, dict) else {}
+    except (TypeError, ValueError):
+        return {}
+
+
+def _provider_for(entry):
+    args = entry.get('arguments')
+    if isinstance(args, dict) and args.get('provider'):
+        return str(args['provider']).casefold()
+    name = entry.get('name', '')
+    if not isinstance(name, str):
+        return ''
+    if name.startswith('get_') and name.endswith('_status'):
+        return name[4:-7].casefold()
+    return ''
+
+
+def _retry_requested(question):
+    normalized = question.casefold()
+    return any(term in normalized for term in (
+        'retry', 'thử lại', 'thu lai', 'thử tối đa', 'thu toi da',
+    ))
+
+
+def _required_followups(question, trace, answer=None, disclosure_prompted=None):
+    """Return model-directed follow-ups for explicit retries and linked incident research."""
+    followups = []
+    tools = [entry for entry in trace if entry.get('event') == 'tool']
+
+    if _retry_requested(question):
+        grouped = {}
+        for entry in tools:
+            result = _tool_result(entry)
+            is_limited = result.get('error') == 'RATE_LIMITED' or result.get('http_status') == 429
+            if is_limited:
+                key = (entry.get('name'), _provider_for(entry))
+                grouped.setdefault(key, []).append(entry)
+        for (name, provider), limited in grouped.items():
+            last_limited = limited[-1]
+            last_index = trace.index(last_limited)
+            matching_attempts = [entry for entry in tools
+                                 if entry.get('name') == name and _provider_for(entry) == provider]
+            later = [entry for entry in trace[last_index + 1:]
+                     if entry.get('event') == 'tool' and entry.get('name') == name
+                     and _provider_for(entry) == provider]
+            later_success = any(
+                _tool_result(entry).get('error') != 'RATE_LIMITED'
+                and _tool_result(entry).get('http_status') != 429
+                and _tool_result(entry).get('ok') is not False
+                for entry in later
+            )
+            attempts = len(matching_attempts)
+            last_result = _tool_result(matching_attempts[-1])
+            last_attempt_limited = (last_result.get('error') == 'RATE_LIMITED'
+                                    or last_result.get('http_status') == 429)
+            if last_attempt_limited and attempts < 3:
+                followups.append((f'retry:{provider}',
+                    f'{provider} trả HTTP 429. Người dùng đã yêu cầu retry có giới hạn. '
+                    f'Hãy gọi lại {name} trong model step tiếp theo (tối đa 3 lần gọi tổng cộng), '
+                    'hoặc nếu đã đạt giới hạn thì báo trạng thái chưa xác định. Không tự kết luận dịch vụ outage.'))
+            elif later_success and answer is not None:
+                text = answer.casefold()
+                disclosed = ('429' in text or 'rate limit' in text or 'rate-limit' in text
+                             or 'giới hạn' in text or 'gioi han' in text)
+                prompted = disclosure_prompted if disclosure_prompted is not None else set()
+                key = f'disclose:{provider}'
+                if not disclosed and key not in prompted:
+                    followups.append((key,
+                        f'Nêu rõ trong câu trả lời cuối rằng lần gọi đầu của {provider} bị HTTP 429 '
+                        'và lần gọi sau đã thành công; giữ nguyên kết quả tool và nguồn.'))
+
+    normalized = question.casefold()
+    asks_latest = 'incident' in normalized and any(term in normalized for term in (
+        'mới nhất', 'gần nhất', 'latest', 'most recent',
+    ))
+    asks_link = any(term in normalized for term in (
+        'liên kết', 'theo link', 'the link', 'follow the link', 'linked incident',
+    ))
+    detailed = set()
+    for entry in tools:
+        if entry.get('name') != 'get_incident_details':
+            continue
+        args = entry.get('arguments') or {}
+        if isinstance(args, dict):
+            detailed.add((_provider_for(entry), str(args.get('incident_id', '')).casefold()))
+
+    if asks_latest:
+        for entry in tools:
+            name = entry.get('name')
+            if not isinstance(name, str) or not name.startswith('get_') or not name.endswith('_status'):
+                continue
+            result = _tool_result(entry)
+            if result.get('error') or not isinstance(result.get('incidents'), list):
+                continue
+            provider = _provider_for(entry)
+            incidents = result['incidents']
+            if not incidents:
+                continue
+            incident = incidents[0]
+            incident_id = str(incident.get('id', '')) if isinstance(incident, dict) else ''
+            safe_id = re.fullmatch(r'[A-Za-z0-9_-]{1,64}', incident_id)
+            if safe_id and (provider, incident_id.casefold()) not in detailed:
+                followups.append((f'detail:{provider}:{incident_id}',
+                    f'Để trả lời yêu cầu incident mới nhất của {provider}, hãy gọi '
+                    f'get_incident_details(provider="{provider}", incident_id="{incident_id}") '
+                    'trước khi kết luận về phạm vi, thời gian hay cập nhật.'))
+
+    if asks_link:
+        linked = []
+        for entry in tools:
+            if entry.get('name') != 'get_incident_details':
+                continue
+            result = _tool_result(entry)
+            provider = _provider_for(entry)
+            current = str(result.get('id', '')).casefold()
+            updates = result.get('updates', [])
+            for update in updates if isinstance(updates, list) else []:
+                body = update.get('body', '') if isinstance(update, dict) else ''
+                for incident_id in re.findall(r'/incidents?/([a-z0-9]{8,20})', str(body), re.I):
+                    key = (provider, incident_id.casefold())
+                    if incident_id.casefold() != current and key not in detailed:
+                        linked.append(key)
+        for provider, incident_id in dict.fromkeys(linked):
+            followups.append((f'linked:{provider}:{incident_id}',
+                f'Tool đã cung cấp liên kết tới incident {incident_id} của {provider}. '
+                'Hãy tra incident liên kết bằng get_incident_details ở model step tiếp theo rồi mới trả lời.'))
+
+    return followups
 
 
 def _trace_result(result, level=1):
@@ -228,6 +362,7 @@ def run_agent(question, provider, tools, max_steps=6, strict_sources=False):
     messages = [{'role': 'system', 'content': system}, {'role': 'user', 'content': question}]
     trace, usage, urls = [], [], {}
     strict_source_prompted = False
+    disclosure_prompted = set()
     retry_state = {'counts': {}, 'deadlines': {}}
     for step in range(1, max_steps + 1):
         try:
@@ -247,12 +382,26 @@ def run_agent(question, provider, tools, max_steps=6, strict_sources=False):
         if calls:
             for call in calls:
                 messages.append(_run_one_tool(tools, call, step, trace, urls, retry_state))
+            followups = _required_followups(question, trace)
+            if followups:
+                messages.append({'role': 'user', 'content': '\n'.join(text for _, text in followups)})
+                trace.extend({'event': 'agent_followup', 'step': step,
+                              'kind': kind.split(':', 1)[0]} for kind, _ in followups)
             continue
         if finish != 'stop':
             return _error(trace, usage, f'Model stopped with finish={finish!r}.', step)
         answer = message.get('content') or ''
         if not isinstance(answer, str):
             answer = str(answer)
+        followups = _required_followups(question, trace, answer, disclosure_prompted)
+        if followups:
+            for kind, _ in followups:
+                if kind.startswith('disclose:'):
+                    disclosure_prompted.add(kind)
+            messages.append({'role': 'user', 'content': '\n'.join(text for _, text in followups)})
+            trace.extend({'event': 'agent_followup', 'step': step,
+                          'kind': kind.split(':', 1)[0]} for kind, _ in followups)
+            continue
         normalized_answer = answer.casefold()
         cited = {service for service, source_urls in urls.items()
                  if any(url.rstrip('/').casefold() in normalized_answer for url in source_urls)}
