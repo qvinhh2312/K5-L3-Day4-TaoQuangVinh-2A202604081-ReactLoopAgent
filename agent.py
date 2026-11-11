@@ -1,6 +1,9 @@
 """Tool-using status agent loop."""
 import json
 import math
+import time
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from urllib.parse import urlsplit
 
 from status_tools import SCHEMAS
@@ -64,6 +67,35 @@ def _valid_http_url(value):
         return False
 
 
+def _retry_key(name, args):
+    provider = None
+    prefix, suffix = 'get_', '_status'
+    if isinstance(name, str) and name.startswith(prefix) and name.endswith(suffix):
+        provider = name[len(prefix):-len(suffix)]
+    if not provider and isinstance(args, dict):
+        provider = args.get('provider')
+    return name, str(provider or 'unknown')
+
+
+def _retry_delay(result):
+    """Read seconds or HTTP-date Retry-After values, capped at ten seconds."""
+    for value in (result.get('retry_after_seconds'), result.get('retry_after')):
+        if value is None or isinstance(value, bool):
+            continue
+        try:
+            seconds = float(value)
+        except (TypeError, ValueError):
+            try:
+                deadline = parsedate_to_datetime(str(value))
+                if deadline.tzinfo is None:
+                    deadline = deadline.replace(tzinfo=timezone.utc)
+                seconds = (deadline - datetime.now(timezone.utc)).total_seconds()
+            except (TypeError, ValueError, OverflowError):
+                continue
+        return max(0.0, min(seconds, 10.0))
+    return 0.0
+
+
 def _trace_result(result, level=1):
     """Keep useful evidence while progressively shrinking large tool results."""
     safe = _json_safe(result)
@@ -89,7 +121,7 @@ def _fit_trace(trace):
     """Compact payload fields in place without removing any trace events."""
     for level in (1, 2, 3):
         for entry in trace:
-            if entry.get('event') != 'tool':
+            if entry.get('event') not in ('tool', 'tool_blocked'):
                 continue
             try:
                 parsed = json.loads(entry['result'])
@@ -105,7 +137,8 @@ def _fit_trace(trace):
             return
 
 
-def _run_one_tool(tools, call, step, trace, urls):
+def _run_one_tool(tools, call, step, trace, urls, retry_state=None):
+    retry_state = retry_state if retry_state is not None else {'counts': {}, 'deadlines': {}}
     if not isinstance(call, dict):
         call = {}
     name = call.get('name', '')
@@ -119,6 +152,25 @@ def _run_one_tool(tools, call, step, trace, urls):
             args = json.loads(raw)
         except (TypeError, ValueError):
             args = None
+    retry_key = _retry_key(name, args)
+    if retry_state['counts'].get(retry_key, 0) >= 3:
+        blocked = {'ok': False, 'error': 'RATE_LIMITED',
+                   'message': 'Tool blocked after three consecutive rate limits; service status is unknown.'}
+        blocked_entry = {'event': 'tool_blocked', 'step': step, 'tool_call_id': call.get('id'),
+                         'name': name, 'arguments': _json_safe(args if isinstance(args, dict) else raw),
+                         'result': json.dumps(blocked, ensure_ascii=False)}
+        if len(json.dumps(blocked_entry, ensure_ascii=False, default=str)) > 2400:
+            encoded = json.dumps(blocked_entry['arguments'], ensure_ascii=False, default=str)
+            blocked_entry['arguments'] = {'truncated': True, 'preview': encoded[:1000]}
+        trace.append(blocked_entry)
+        _fit_trace(trace)
+        return {'role': 'tool', 'tool_call_id': call.get('id'),
+                'content': json.dumps(blocked, ensure_ascii=False)}
+    deadline = retry_state['deadlines'].pop(retry_key, None)
+    if deadline is not None:
+        remaining = max(0.0, min(deadline - time.monotonic(), 10.0))
+        if remaining:
+            time.sleep(remaining)
     if not isinstance(args, dict):
         result = {'ok': False, 'error': 'INVALID_ARGUMENTS',
                   'message': 'Tool arguments must be a JSON object.'}
@@ -130,6 +182,14 @@ def _run_one_tool(tools, call, step, trace, urls):
                           'message': 'Tool returned a non-object result.'}
         except Exception as exc:
             result = {'ok': False, 'error': type(exc).__name__, 'message': str(exc)[:200]}
+    if result.get('error') == 'RATE_LIMITED' or result.get('http_status') == 429:
+        retry_state['counts'][retry_key] = retry_state['counts'].get(retry_key, 0) + 1
+        delay = _retry_delay(result)
+        if delay:
+            retry_state['deadlines'][retry_key] = time.monotonic() + delay
+    else:
+        retry_state['counts'].pop(retry_key, None)
+        retry_state['deadlines'].pop(retry_key, None)
     if name == 'get_incident_details' and result.get('ok') is True and _valid_http_url(result.get('url')):
         urls.setdefault(result.get('provider') or args.get('provider') or 'unknown', set()).add(result['url'])
     try:
@@ -157,6 +217,7 @@ def run_agent(question, provider, tools, max_steps=6, strict_sources=False):
     messages = [{'role': 'system', 'content': system}, {'role': 'user', 'content': question}]
     trace, usage, urls = [], [], {}
     strict_source_prompted = False
+    retry_state = {'counts': {}, 'deadlines': {}}
     for step in range(1, max_steps + 1):
         try:
             reply = provider.complete(messages, schemas)
@@ -174,7 +235,7 @@ def run_agent(question, provider, tools, max_steps=6, strict_sources=False):
             return _error(trace, usage, 'Model output was truncated (finish=length).', step)
         if calls:
             for call in calls:
-                messages.append(_run_one_tool(tools, call, step, trace, urls))
+                messages.append(_run_one_tool(tools, call, step, trace, urls, retry_state))
             continue
         if finish != 'stop':
             return _error(trace, usage, f'Model stopped with finish={finish!r}.', step)
