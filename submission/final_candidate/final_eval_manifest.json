@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "source_commit": "16290eea43d14595f57dc8374f7a0bcb22ba77d0",
+  "source_agent_sha256_normalized_lf": "cf3476f76ddd05ec09ac69cb778403179667824f0b088dab7796c3e4f222ccab",
+  "source_commit_basis": "Eval files were generated after this commit; packaged source hash matches the committed agent.py.",
+  "evaluations": {
+    "eval_next_candidate.json": {
+      "sha256": "d17448cb1e21fe5585a5f302050a83d1808249a698d383e8871a045346d61046",
+      "run_file_mtime_utc": "2026-11-11T18:29:30.554629+00:00",
+      "config": {
+        "provider": "openrouter",
+        "model": "openai/gpt-4o-mini",
+        "judge_provider": "openrouter",
+        "judge_model": "openai/gpt-4o-mini",
+        "max_steps": 8,
+        "dataset": "core"
+      },
+      "summary": {
+        "total_cases": 22,
+        "scored_cases": 22,
+        "unscored_cases": 0,
+        "score_0_100": 87.95,
+        "partial_mean_0_100": null
+      }
+    },
+    "eval_bonus_next_candidate.json": {
+      "sha256": "33702c002d6c38dd3187ba1dfae0708c4017876a3a5b1e051efe846efccbb8fe",
+      "run_file_mtime_utc": "2026-11-11T18:31:26.930481+00:00",
+      "config": {
+        "provider": "openrouter",
+        "model": "openai/gpt-4o-mini",
+        "judge_provider": "openrouter",
+        "judge_model": "openai/gpt-4o-mini",
+        "max_steps": 16,
+        "dataset": "bonus"
+      },
+      "summary": {
+        "total_cases": 10,
+        "scored_cases": 10,
+        "unscored_cases": 0,
+        "score_0_100": 76.5,
+        "partial_mean_0_100": null,
+        "bonus_points_0_15": 11.47
+      }
+    }
+  },
+  "validation": "core 22/22 scored; bonus 10/10 scored; provider/model/judge and step configuration recorded in each report."
+}

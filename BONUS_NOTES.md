@@ -74,3 +74,22 @@ $env:PYTHONUTF8 = "1"
 $env:OPENROUTER_API_KEY = "<your key>"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run_remaining_evals.ps1
 ```
+
+## Full bonus run on retry-limited source
+
+The later report is complete: **10/10 cases, 76.5/100, 11.47/15** on source commit `16290eea43d14595f57dc8374f7a0bcb22ba77d0`, using OpenRouter `openai/gpt-4o-mini` for both agent and judge, `max_steps=16`, one worker.
+
+| Case | Score | Result |
+|---|---:|---|
+| B1 | 80 | Queried all five providers. |
+| B2 | 100 | Retrieved timeline across pages. |
+| B3 | 75 | Retried after 429; judge wants an explicit note that 429 is not an outage. |
+| B4 | 85 | Stopped within the retry cap; Vercel status remains unknown after repeated 429s. |
+| B5 | 100 | Corrected invalid arguments and cited the incident. |
+| B6 | 80 | Looked up details for both latest relevant incidents. |
+| B7 | 45 | Answered npm status but added an unnecessary historical incident list; judge found date/status inaccuracies. |
+| B8 | 100 | Compared both incidents with sources. |
+| B9 | 30 | Failed to state directly that Linear/Slack are unsupported and included unrelated providers. |
+| B10 | 70 | Bounded retry stayed within the maximum call count. |
+
+The previous 9/10 partial report was caused by a transient connection reset on B6 and is superseded by this complete run for the source in that commit. B7 and B9 remain the lowest bonus cases and motivate the next prompt adjustment.

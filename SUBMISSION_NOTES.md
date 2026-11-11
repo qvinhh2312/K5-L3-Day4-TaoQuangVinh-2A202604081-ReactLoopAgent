@@ -106,12 +106,19 @@ Kết quả trên commit `ca987f0c7a96b5fc91ce2cb2c4c8ff50960c6147`:
 - H1/H6 đều đạt hai model steps, không còn mechanical violation. B3 nêu rõ 429 rồi retry thành công. B4 gọi Vercel ba lần rồi bị chặn lần gọi kế tiếp.
 - B10 vượt giới hạn ba lần gọi Vercel: lần gọi thành công reset bộ đếm liên tiếp, khiến model tiếp tục gọi. Đây là lỗi giới hạn ở retry state.
 
-Sau eval này, `agent.py` được sửa để đếm tối đa ba lần gọi tổng cộng cho câu hỏi yêu cầu retry rõ ràng và yêu cầu dừng sau lần retry thành công. Thay đổi mới chưa được đánh giá. Kết quả `eval_next_candidate.json`/`eval_bonus_next_candidate.json` chỉ áp dụng cho commit `ca987f0` trước sửa đổi cuối.
+Ngay sau eval này, `agent.py` được sửa để đếm tối đa ba lần gọi tổng cộng cho câu hỏi yêu cầu retry rõ ràng và yêu cầu dừng sau lần retry thành công. Tại thời điểm đó thay đổi chưa được chấm; lượt full eval sau trên commit `16290ee` được ghi bên dưới.
 
-## Hạng mục còn mở sau lượt đó
+## Full eval sau giới hạn retry
 
-- `eval_next_candidate.json`: core 22/22, **80.23/100**. H1 và H6 đều đạt 80 và không còn mechanical violation; H2 đạt 90. E3/E6 vẫn 75/75.
-- `eval_bonus_next_candidate.json`: **9/10 scored**, partial mean 78.33; điểm tổng và bonus là `null`. B6 không có kết quả chấm do kết nối model bị reset (`WinError 10054`), nên cần chạy lại full bonus.
-- B10 bị cap 50 vì bốn lần gọi Vercel; đây là lý do thêm giới hạn tổng lần thử. Bản sửa sau commit `ca987f0` hiện trong `submission/final_candidate/` và chưa được eval.
+Đã chạy đủ hai bộ trên source commit `16290eea43d14595f57dc8374f7a0bcb22ba77d0`, cùng OpenRouter `openai/gpt-4o-mini` cho agent/judge, snapshot, `workers=1`:
 
-Họ tên, MSSV và lớp đã được điền ở đầu ghi chú. `origin` hiện là `https://github.com/qvinhh2312/K5-L3-Day4-ReactLoopAgent`; repo cần đổi thành `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`. URL dự kiến sau đổi tên là `https://github.com/qvinhh2312/K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`, chưa xác nhận. Trạng thái nộp LMS cũng chưa được ghi nhận. Các output eval đã có được giữ nguyên; không ghép tay hoặc sửa kết quả chấm.
+- Core: **87.95/100 (22/22)**, `max_steps=8`.
+- Bonus: **76.5/100 (10/10)**, quy đổi **11.47/15**, `max_steps=16`.
+- B6 được chấm 80; B10 70 và không vượt cap số lần gọi.
+- Điểm thấp còn lại: B7 45 (incident history không cần thiết, judge đánh dấu ngày/status sai) và B9 30 (không nêu rõ Linear/Slack không được hỗ trợ, trả thêm provider khác).
+
+Họ tên, MSSV và lớp đã được điền ở đầu ghi chú. `origin` hiện là `https://github.com/qvinhh2312/K5-L3-Day4-ReactLoopAgent`; repo cần đổi thành `K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`. URL dự kiến sau đổi tên là `https://github.com/qvinhh2312/K5-L3B-DAY04-TaoQuangVinh-2A202604081-ReactLoopAgent`. Việc đổi tên GitHub và trạng thái nộp LMS chưa được xác nhận. Eval files giữ nguyên theo output chạy; không ghép tay hoặc sửa kết quả chấm.
+
+## Prompt candidate cho B7/B9
+
+Sau full eval trên, system prompt được bổ sung hướng dẫn trả lời đúng phạm vi provider/thời điểm được hỏi và nêu rõ khi provider không có tích hợp. Source mới nằm trong `submission/pending_prompt_candidate/`; nó chưa được eval. Kết quả **87.95/100** và **76.5/100 (11.47/15)** ở trên chỉ áp dụng cho source commit `16290eea43d14595f57dc8374f7a0bcb22ba77d0`. Cần chạy hai lệnh trong `submission/pending_prompt_candidate/EVAL_PENDING.md` để đo candidate mới.

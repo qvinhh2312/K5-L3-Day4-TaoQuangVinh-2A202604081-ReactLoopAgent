@@ -76,10 +76,23 @@ Sau đó đã xuất hiện `eval_next_candidate.json` và `eval_bonus_next_cand
 
 Follow-up đã giúp H1/H6 đủ hai model step (đều 80 điểm, không còn mechanical violation), B3 nêu được lần đầu bị 429 rồi retry thành công (75), B4 dừng sau ba lần Vercel bị giới hạn (85). B6 bị `WinError 10054` khi model gọi tiếp sau các nhắc việc; case chưa được chấm, không được tính như điểm 0. B10 có bốn tool calls Vercel vì loop reset bộ đếm sau khi một retry thành công; mechanical check giới hạn tối đa ba lần nên case bị cap 50.
 
-Sau lượt này, loop được sửa để giới hạn tổng số lần gọi là ba khi user yêu cầu retry và nhắc model dừng sau khi retry thành công. Bản sửa mới này **chưa được eval**. Link repo GitHub đã đổi tên và trạng thái nộp LMS chưa có trong workspace.
+Sau lượt này, loop được sửa để giới hạn tổng số lần gọi là ba khi user yêu cầu retry và nhắc model dừng sau khi retry thành công. Tại thời điểm đó bản sửa chưa được eval; kết quả của lượt chạy đầy đủ sau đó được ghi dưới đây.
 
 ### Kết quả cho commit `ca987f0`
 
 Core được chấm đủ 22/22, đạt **80.23/100**. H1/H6 đạt yêu cầu hai model step, mỗi case 80 điểm; H2 đạt 90. Bonus chỉ chấm đủ 9/10, partial mean 78.33, không có điểm tổng hoặc điểm bonus hợp lệ vì B6 gặp lỗi kết nối `[WinError 10054]`. B10 bị cap 50 do bốn lần gọi Vercel. Những kết quả này áp dụng cho commit `ca987f0`, trước sửa giới hạn tổng lần gọi.
 
-Code sau sửa được lưu tại `submission/final_candidate/`; chưa có kết quả eval của bản đó. Thông tin cá nhân đã được điền ở đầu file. Remote `origin` vẫn trỏ tới tên repo cũ nêu trên; tên và URL đích đã ghi ở đầu file. Chưa xác nhận việc đổi tên GitHub hay nộp LMS.
+Code sau sửa được lưu tại `submission/final_candidate/` và đã có lượt eval đủ core/bonus ghi dưới đây. Thông tin cá nhân đã được điền ở đầu file. Remote `origin` vẫn trỏ tới tên repo cũ nêu trên; tên và URL đích đã ghi ở đầu file. Chưa xác nhận việc đổi tên GitHub hay nộp LMS.
+
+### Lượt eval đầy đủ trên source hiện tại
+
+Các file `eval_next_candidate.json` và `eval_bonus_next_candidate.json` đã được cập nhật sau khi chạy trên source commit `16290eea43d14595f57dc8374f7a0bcb22ba77d0`, cùng model/judge OpenRouter `openai/gpt-4o-mini`, core `max_steps=8`, bonus `max_steps=16`, `workers=1`:
+
+| Tập | Điểm | Số case |
+|---|---:|---:|
+| Core | **87.95/100** | 22/22 |
+| Bonus | **76.5/100 = 11.47/15** | 10/10 |
+
+So với lượt 80.23 core và bonus partial trên `ca987f0`, lần này H1/H2 đều đạt 100; H6 75 không còn mechanical violation; B6 đạt 80; B10 đạt 70 và không vượt giới hạn retry. Các điểm thấp còn lại là B7 **45** (trả thêm danh sách incident lịch sử ngoài yêu cầu, judge đánh giá một số thời gian sai) và B9 **30** (không nêu thẳng rằng Linear/Slack không được hỗ trợ, đồng thời báo các provider khác không được hỏi).
+
+Manifest cùng bản source và hai báo cáo đã lưu trong `submission/final_candidate/`. Sau lượt này, agent prompt được siết thêm để chỉ trả đúng phạm vi yêu cầu và không suy status của provider không có tool; thay đổi sau cùng này cần eval lại trước khi xem là bản cuối.
